@@ -430,6 +430,8 @@ trait QueryBuilder
                             'path' => $field,
                             'query' => $query,
                             'inner_hits' => $options,
+                            'score_mode' => $operand['score_mode'],
+                            'ignore_unmapped' => $operand['ignore_unmapped'],
                         ],
                     ];
 

@@ -35,7 +35,7 @@ use PDPhilip\Elasticsearch\Query\Builder;
  * @method static $this orWhereRegex(string $column, string $regex)
  * @method static $this whereNestedObject(string $column, Callable $callback, string $scoreType = 'avg')
  * @method static $this whereNotNestedObject(string $column, Callable $callback, string $scoreType = 'avg')
- * @method static $this queryNested(string $column, Callable $callback)
+ * @method static $this queryNested(string $column, Callable $callback, string $scoreMode = 'avg', bool $ignoreUnmapped = false)
  *
  * Filter and order methods ---------------------------------
  * @method static $this orderBy(string $column, string $direction = 'asc')

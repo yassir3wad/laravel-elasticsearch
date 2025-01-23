@@ -559,7 +559,7 @@ class Builder extends BaseBuilder
         return $this;
     }
 
-    public function queryNested($column, $callBack): static
+    public function queryNested($column, $callBack, $scoreMode = 'avg', $ignoreUnmapped = false): static
     {
         $boolean = 'and';
         $query = $this->newQuery();
@@ -572,6 +572,8 @@ class Builder extends BaseBuilder
             'wheres' => $wheres,
             'options' => $options,
             'boolean' => $boolean,
+            'score_mode' => $scoreMode,
+            'ignore_unmapped' => $ignoreUnmapped,
         ];
 
         return $this;
@@ -1559,6 +1561,8 @@ class Builder extends BaseBuilder
                 'innerNested' => [
                     'wheres' => $where['wheres'],
                     'options' => $where['options'],
+                    'score_mode' => $where['score_mode'],
+                    'ignore_unmapped' => $where['ignore_unmapped'],
                 ],
             ],
         ];
