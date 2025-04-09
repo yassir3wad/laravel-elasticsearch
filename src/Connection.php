@@ -603,7 +603,7 @@ class Connection extends BaseConnection
     public function reconnectIfMissingConnection(): void
     {
         if (is_null($this->connection)) {
-            $this->createConnection();
+            $this->connection = $this->createConnection();
         }
     }
 
