@@ -265,6 +265,13 @@ class Connection extends BaseConnection
         return $this->connection;
     }
 
+   public function getConnectedClient(): ?ElasticClient
+    {
+        $this->reconnectIfMissingConnection();
+
+        return $this->connection;
+    }
+
     public function getIndexPrefix(): string
     {
         return $this->getTablePrefix();
@@ -365,7 +372,7 @@ class Connection extends BaseConnection
      */
     public function createAlias(string $index, string $name): void
     {
-        $this->connection->createAlias($index, $name);
+        $this->getConnectedClient()->createAlias($index, $name);
     }
 
     /**
@@ -374,9 +381,9 @@ class Connection extends BaseConnection
     public function createIndex(string $index, array $body): array
     {
         try {
-            $this->connection->createIndex($index, $body);
+            $this->getConnectedClient()->createIndex($index, $body);
 
-            return $this->connection->getMappings($index);
+            return $this->getConnectedClient()->getMappings($index);
         } catch (Exception $e) {
             throw new QueryException($e, compact('index', 'body'));
         }
@@ -389,7 +396,7 @@ class Connection extends BaseConnection
      */
     public function dropIndex(string $index): void
     {
-        $this->connection->dropIndex($index);
+        $this->getConnectedClient()->dropIndex($index);
     }
 
     /**
@@ -399,9 +406,9 @@ class Connection extends BaseConnection
      */
     public function updateIndex(string $index, array $body): array
     {
-        $this->connection->updateIndex($index, $body);
+        $this->getConnectedClient()->updateIndex($index, $body);
 
-        return $this->connection->getMappings($index);
+        return $this->getConnectedClient()->getMappings($index);
     }
 
     /**
@@ -411,17 +418,17 @@ class Connection extends BaseConnection
      */
     public function getFieldMapping($index, $fields): array
     {
-        return $this->connection->getFieldMapping($index, $fields);
+        return $this->getConnectedClient()->getFieldMapping($index, $fields);
     }
 
     public function getMappings($index): array
     {
-        return $this->connection->getMappings($index);
+        return $this->getConnectedClient()->getMappings($index);
     }
 
     public function indices(): Indices
     {
-        return $this->connection->indices();
+        return $this->getConnectedClient()->indices();
     }
 
     // ----------------------------------------------------------------------
@@ -466,7 +473,7 @@ class Connection extends BaseConnection
             'body' => $query['body'],
         ];
 
-        $pages = new SearchResponseIterator($this->connection, $scrollParams);
+        $pages = new SearchResponseIterator($this->getConnectedClient(), $scrollParams);
         foreach ($pages as $page) {
             yield $page;
         }
@@ -523,7 +530,7 @@ class Connection extends BaseConnection
         return $this->run(
             $query,
             $bindings,
-            $this->connection->deleteByQuery(...)
+            $this->getConnectedClient()->deleteByQuery(...)
         );
     }
 
@@ -540,7 +547,7 @@ class Connection extends BaseConnection
         $result = $this->run(
             $this->addClientParams($query),
             $bindings,
-            $this->connection->bulk(...)
+            $this->getConnectedClient()->bulk(...)
         );
 
         if (! $continueWithErrors && ! empty($result['errors'])) {
@@ -611,13 +618,13 @@ class Connection extends BaseConnection
         return $this->run(
             $this->addClientParams($params),
             $bindings,
-            $this->connection->search(...)
+            $this->getConnectedClient()->search(...)
         );
     }
 
     public function count($params): int
     {
-        return $this->connection->count($params);
+        return $this->getConnectedClient()->count($params);
     }
 
     /**
@@ -633,7 +640,7 @@ class Connection extends BaseConnection
         return $this->run(
             $query,
             $bindings,
-            $this->connection->$updateMethod(...)
+            $this->getConnectedClient()->$updateMethod(...)
         );
     }
 
@@ -643,7 +650,7 @@ class Connection extends BaseConnection
      */
     public function raw($value): Elasticsearch|Promise
     {
-        return $this->connection->search($value);
+        return $this->getConnectedClient()->search($value);
     }
 
     /**
@@ -687,7 +694,7 @@ class Connection extends BaseConnection
      */
     public function openPit(mixed $query): ?string
     {
-        return $this->connection->openPit($query);
+        return $this->getConnectedClient()->openPit($query);
     }
 
     /**
@@ -696,7 +703,7 @@ class Connection extends BaseConnection
      */
     public function closePit(mixed $query): bool
     {
-        return $this->connection->closePit($query);
+        return $this->getConnectedClient()->closePit($query);
     }
 
     // ----------------------------------------------------------------------
@@ -705,7 +712,7 @@ class Connection extends BaseConnection
 
     public function elastic(): Client
     {
-        return $this->connection->client();
+        return $this->getConnectedClient()->client();
     }
 
     /**
@@ -714,7 +721,7 @@ class Connection extends BaseConnection
      */
     public function clusterSettings($flat = true): array
     {
-        return $this->connection->clusterSettings($flat);
+        return $this->getConnectedClient()->clusterSettings($flat);
     }
 
     /**
@@ -723,7 +730,7 @@ class Connection extends BaseConnection
      */
     public function setClusterFieldDataOnId(bool $enabled, bool $transient = false): array
     {
-        return $this->connection->setClusterFieldDataOnId($enabled, $transient);
+        return $this->getConnectedClient()->setClusterFieldDataOnId($enabled, $transient);
     }
 
     // ----------------------------------------------------------------------
@@ -741,7 +748,7 @@ class Connection extends BaseConnection
     //    {
     //        dd($method);
     //
-    //        return call_user_func_array([$this->connection, $method], $parameters);
+    //        return call_user_func_array([$this->getConnectedClient(), $method], $parameters);
     //    }
 
     // ----------------------------------------------------------------------
@@ -760,7 +767,7 @@ class Connection extends BaseConnection
     //        return $this->run(
     //            $query,
     //            $bindings,
-    //            $this->connection->reindex(...)
+    //            $this->getConnectedClient()->reindex(...)
     //        )->asArray();
     //    }
 }
