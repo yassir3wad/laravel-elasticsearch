@@ -254,7 +254,7 @@ class Connection extends BaseConnection
     /** {@inheritdoc} */
     public function disconnect(): void
     {
-        $this->connection = null;
+        $this->connection = $this->createConnection();
     }
 
     // ----------------------------------------------------------------------
